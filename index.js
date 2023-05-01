@@ -21,6 +21,9 @@ class ProductManager {
         if (!title || !description || !price || !thumbnail || !code || !stock) {
             console.error('campos incompletos')
             return
+        } else if (this.#products.find(prod => prod.code === code)) {
+            console.error('Ya existe un producto con ese codigo')
+            return
         }
 
         let id = this.generarId()
@@ -51,8 +54,10 @@ class ProductManager {
 }
 
 const productManager = new ProductManager();
-productManager.addProduct('evento1', 'descripcion', 5, 'fds', 'fds', 45)
-productManager.addProduct('evento2', 'descripcion2', 7, 'fds', 'fds', 35)
-productManager.addProduct('evento3', 'descripcion3', 8,  'fdfdfs', 'fgfds', 25)
+productManager.addProduct('evento1', 'descripcion', 5, 'fds', 1, 45)
+productManager.addProduct('evento2', 'descripcion2', 7, 'fds', 2, 35)
+productManager.addProduct('evento3', 'descripcion3', 4,  'fdffs', 3, 5)
+productManager.addProduct('evento4', 'descripcion4', 8,  'fdfdfs', 3, 25)
 console.log(productManager.getProducts());
 console.log(productManager.getProductById(2));
+console.log(productManager.getProductById(4));

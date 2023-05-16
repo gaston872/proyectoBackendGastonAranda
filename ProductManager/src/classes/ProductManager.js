@@ -7,10 +7,10 @@ export default class ProductManager {
 
     constructor(){
         this.#products = []
-        this.#path = './files/productos.json'
+        this.#path = './src/classes/files/productos.json'
     }
 
-    cargarProductos = async() => {
+    cargarProductos = async(limit) => {
         if(fs.existsSync(this.#path)){
             const data = await fs.promises.readFile(this.#path, 'utf-8')
             this.#products = JSON.parse(data)
@@ -31,28 +31,35 @@ export default class ProductManager {
     }
 
     saveProducts = async() => {
-        const data = JSON.stringify(this.#products, null, '\t')
-        await fs.promises.writeFile(this.#path, data, 'utf-8')
+        await fs.promises.writeFile(this.#path, JSON.stringify(this.#products, null, '\t'))
     }
 
-    getProducts() {
+    getProducts = async () => {
+        const products = await this.cargarProductos()
         console.log('Lista de productos:');
-        this.#products.forEach(product => {
+        /* this.# */products.forEach(product => {
             console.log(product);
         });
     }
 
     getProductById = async(id) => {
-        const product = this.#products.find(p=> p.id == id)
-        if(!product){
-            return console.log('not found'); 
+        const products = await this.cargarProductos()
+        const productoBuscado = /* this.# */products.find(p=> p.id == id)
+        if(!productoBuscado){
+            return 'not found'/* console.log('not found'); */ 
         }else {
-            return console.log(product);  
+            return productoBuscado /* console.log(productoBuscado); */  
         }
     }
 
-    addProduct = async (title, description, price, thumbnail, code, stock) => {
+    getProductBylimit = async(limit) => {
+        const products = await this.cargarProductos()
 
+    const productosLimitados = products.slice(0, limit)
+    return console.log(productosLimitados);
+    }
+
+    addProduct = async (title, description, price, thumbnail, code, stock) => {
         if (!title || !description || !price || !thumbnail || !code || !stock) {
             console.error('campos incompletos')
             return
@@ -75,9 +82,12 @@ export default class ProductManager {
     }
 
     deleteProduct = async(id) => {
-        const index = this.#products.findIndex(product => product.id === id);
+        const products = await this.cargarProductos()
+        const index = /* this.# */products.findIndex(product => product.id === id);
         if (index !== -1) {
-            const eliminado = this.#products.splice(index, 1)[0];
+            const eliminado = /* this.# */products.splice(index, 1)[0];
+            for (let i = index; i < products.length; i++) {
+                products[i].id = i + 1;}
             await this.saveProducts();
             console.log('Producto eliminado:', eliminado);
         } else {
@@ -85,23 +95,36 @@ export default class ProductManager {
         }
     }
 
-    actualizarProducto = async(id, newInfo) => {
-        const product = this.getProductById(id);
-        if (!product) {
-            console.log('Producto no encontrado');
-            return;
-        }
+    actualizarProducto = async (id, newInfo) => {
+        this.#products = await this.cargarProductos();
+        const index = this.#products.findIndex(product => product.id === id);
 
-        const updatedProduct = { ...product, ...newInfo };
-        this.#products = this.#products.map(p => (p.id === id ? updatedProduct : p));
-        await this.saveProducts();
-        console.log('Producto modificado:', updatedProduct);
+        if (index !== -1) {
+            const updatedProduct = { ...this.#products[index], ...newInfo };
+            this.#products[index] = updatedProduct;
+            await this.saveProducts();
+            console.log('Producto modificado:', updatedProduct);
+            return updatedProduct;
+        } else {
+            console.log('Producto no encontrado');
+            return null;
+        }
     }
 }
 
 const manager = new ProductManager();
 
-async function test() {
+/* manager.addProduct('Producto 1', 'Descripción 1', 10, 'thumbnail1.jpg', 'CODE1', 20);
+manager.addProduct('Producto 2', 'Descripción 2', 20, 'thumbnail2.jpg', 'CODE2', 15);
+manager.addProduct('Producto 3', 'Descripción 3', 15, 'thumbnail3.jpg', 'CODE3', 30);
+manager.addProduct('Producto 4', 'Descripción 4', 25, 'thumbnail4.jpg', 'CODE4', 12); */
+//manager.deleteProduct(3)
+//manager.actualizarProducto(2, {price: 18, stock: 16})
+//manager.getProducts(); 
+//manager.getProductBylimit(2)
+//console.log(manager.getProductById(2));
+
+/* async function test() {
         await manager.addProduct('Producto 1', 'Descripción 1', 10, 'thumbnail1.jpg', 'CODE1', 20);
         await manager.addProduct('Producto 2', 'Descripción 2', 20, 'thumbnail2.jpg', 'CODE2', 15);
         await manager.addProduct('Producto 3', 'Descripción 3', 15, 'thumbnail3.jpg', 'CODE3', 30);
@@ -125,4 +148,4 @@ async function test() {
         manager.getProducts();
 }
 
-test();
+test(); */

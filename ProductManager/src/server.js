@@ -21,16 +21,11 @@ app.get('/productos/:id', async (req, res) => {
 
 app.get('/productos', async (req, res) => {
     let limit = req.query.limit
-    //const productos = await productManager.cargarProductos(limit)
 
     const productos = await productManager.cargarProductos(limit)
 
     const productosLimitados = productos.slice(0, limit)
     res.send({productosLimitados})
-
-    /* for (let i = 0; i = limit; i++) {
-        res.send(productos[i])
-    } */
 })
 
 app.listen(8080, ()=>{
